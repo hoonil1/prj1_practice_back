@@ -9,7 +9,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class BoardService {
     private final BoardMapper mapper;
-    public void save(Board board) {
+    public boolean save(Board board) {
         mapper.insert(board);
+        return false;
     }
 }
