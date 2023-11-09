@@ -2,9 +2,13 @@ package com.example.prj_practice_back.domain;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 public class Board {
-    public String title;
-    public String content;
-    public String writer;
+    private Integer id;
+    private String title;
+    private String content;
+    private String writer;
+    private LocalDateTime inserted;
 }

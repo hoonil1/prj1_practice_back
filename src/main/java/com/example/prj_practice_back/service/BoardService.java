@@ -5,6 +5,8 @@ import com.example.prj_practice_back.mapper.BoardMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class BoardService {
@@ -33,5 +35,13 @@ public class BoardService {
         }
 
         return true;
+    }
+
+    public List<Board> list() {
+        return mapper.selectAll();
+    }
+
+    public Board get(Integer id) {
+        return mapper.selectById(id);
     }
 }
