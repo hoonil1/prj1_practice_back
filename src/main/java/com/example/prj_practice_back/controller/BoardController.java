@@ -9,18 +9,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("/api/board")
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/board")
 public class BoardController {
+
     private final BoardService service;
 
     @PostMapping("add")
     public ResponseEntity add(@RequestBody Board board) {
-        if(service.validate(board)) {
+
+        if (!service.validate(board)) {
             return ResponseEntity.badRequest().build();
         }
-
 
         if (service.save(board)) {
             return ResponseEntity.ok().build();
