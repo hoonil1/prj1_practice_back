@@ -41,7 +41,7 @@ public class BoardController {
 
     @DeleteMapping("remove/{id}")
     public ResponseEntity remove(@PathVariable Integer id) {
-        if(service.remove(id)) {
+        if (service.remove(id)) {
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.internalServerError().build();
@@ -49,9 +49,19 @@ public class BoardController {
     }
 
     @PutMapping("edit")
-    public void edit(@RequestBody Board board) {
+    public ResponseEntity edit(@RequestBody Board board) {
 //        System.out.println("board = " + board);
-        service.update(board);
+        if (service.validate(board)) {
+
+            if (service.update(board)) {
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.internalServerError().build();
+            }
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+
     }
 
 }
