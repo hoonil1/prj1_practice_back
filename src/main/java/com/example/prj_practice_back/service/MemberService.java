@@ -26,6 +26,10 @@ public class MemberService {
 
     }
 
+    public String getNickName(String nickName) {
+        return mapper.selectNickName(nickName);
+    }
+
     public boolean validate(Member member) {
         if (member == null) {
             return false;
@@ -36,6 +40,9 @@ public class MemberService {
         }
 
         if (member.getPassword().isBlank()) {
+            return false;
+        }
+        if (member.getNickName().isBlank()) {
             return false;
         }
 
@@ -64,6 +71,8 @@ public class MemberService {
 //        if (member.getPassword().equals("")) {
 //            member.setPassword(oldMember.getPassword());
 //        }
-        return mapper.update(member)==1;
+        return mapper.update(member) == 1;
     }
+
+
 }

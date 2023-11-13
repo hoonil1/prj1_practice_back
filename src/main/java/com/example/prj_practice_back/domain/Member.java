@@ -9,4 +9,5 @@ public class Member {
     private String password;
     private String email;
     private String inserted;
+    private String nickName;
 }
