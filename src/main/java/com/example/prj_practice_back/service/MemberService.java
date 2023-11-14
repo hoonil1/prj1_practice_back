@@ -89,4 +89,12 @@ public class MemberService {
         }
         return false;
     }
+
+    public boolean deleteAccess(Member login, String id) {
+        return login.getId().equals(id);
+    }
+
+    public boolean hasAccess(String id, Member login) {
+        return login.getId().equals(id);
+    }
 }
