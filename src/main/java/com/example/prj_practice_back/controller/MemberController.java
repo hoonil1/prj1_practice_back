@@ -68,11 +68,10 @@ public class MemberController {
         if (login == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+
         if (!service.hasAccess(id, login)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        // TODO : 로그인 했는 지? -> 안했으면 401
-        // TODO : 자기 정보인지? -> 아니면 403
 
         Member member = service.getMember(id);
 
@@ -81,16 +80,13 @@ public class MemberController {
 
     @DeleteMapping
     public ResponseEntity delete(String id,
-                                 @SessionAttribute(value = "login",required = false)Member login) {
-
-        // TODO : 로그인 했는 지? -> 안했으면 401
-        // TODO : 자기 정보인지? -> 아니면 403
-
+                                 @SessionAttribute(value = "login", required = false) Member login) {
         if (login == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401
         }
-        if(!service.deleteAccess(login, id)){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+
+        if (!service.hasAccess(id, login)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403
         }
 
         if (service.deleteMember(id)) {
@@ -103,14 +99,14 @@ public class MemberController {
 
     @PutMapping("edit")
     public ResponseEntity edit(@RequestBody Member member,
-                               @SessionAttribute(value = "login",required = false)Member login) {
+                               @SessionAttribute(value = "login", required = false) Member login) {
         if (login == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); //401
         }
-        if (!service.hasAccess(member.getId(),login)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+
+        if (!service.hasAccess(member.getId(), login)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403
         }
-        // TODO: 로그인 했는지, 자기 정보인지
 
         if (service.update(member)) {
             return ResponseEntity.ok().build();
@@ -134,6 +130,11 @@ public class MemberController {
         if (session != null) {
             session.invalidate();
         }
+    }
+
+    @GetMapping("login")
+    public Member login(@SessionAttribute(value = "login", required = false) Member login) {
+        return login;
     }
 
 }

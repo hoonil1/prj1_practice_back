@@ -1,5 +1,6 @@
 package com.example.prj_practice_back.service;
 
+import com.example.prj_practice_back.domain.Auth;
 import com.example.prj_practice_back.domain.Member;
 import com.example.prj_practice_back.mapper.BoardMapper;
 import com.example.prj_practice_back.mapper.MemberMapper;
@@ -30,10 +31,6 @@ public class MemberService {
 
     }
 
-    public String getNickName(String nickName) {
-        return mapper.selectNickName(nickName);
-    }
-
     public boolean validate(Member member) {
         if (member == null) {
             return false;
@@ -44,9 +41,6 @@ public class MemberService {
         }
 
         if (member.getPassword().isBlank()) {
-            return false;
-        }
-        if (member.getNickName().isBlank()) {
             return false;
         }
 
@@ -66,40 +60,65 @@ public class MemberService {
 
 
     public boolean deleteMember(String id) {
-        // 1. 이 멤버가 작성한 게시물을 삭제하고
+        // 1. 이 멤버가 작성한 게시물 삭제
         boardMapper.deleteByWriter(id);
-        // 2. 이 멤버 탈퇴
+
+        // 2. 이 멤버 삭제
+
         return mapper.deleteById(id) == 1;
     }
 
     public boolean update(Member member) {
-//        Member oldMember = mapper.selectId(member.getId());
+//        Member oldMember = mapper.selectById(member.getId());
 //
 //        if (member.getPassword().equals("")) {
 //            member.setPassword(oldMember.getPassword());
 //        }
+
         return mapper.update(member) == 1;
+
     }
 
+    public String getNickName(String nickName) {
+        return mapper.selectNickName(nickName);
+    }
 
     public boolean login(Member member, WebRequest request) {
         Member dbMember = mapper.selectById(member.getId());
 
+
         if (dbMember != null) {
             if (dbMember.getPassword().equals(member.getPassword())) {
+
+                List<Auth> auth = mapper.selectAuthById(member.getId());
+                dbMember.setAuth(auth);
+
                 dbMember.setPassword("");
                 request.setAttribute("login", dbMember, RequestAttributes.SCOPE_SESSION);
                 return true;
             }
         }
+
         return false;
     }
 
-    public boolean deleteAccess(Member login, String id) {
+
+    public boolean hasAccess(String id, Member login) {
+        if (isAdmin(login)) {
+            return true;
+        }
+
         return login.getId().equals(id);
     }
 
-    public boolean hasAccess(String id, Member login) {
-        return login.getId().equals(id);
+    public boolean isAdmin(Member login) {
+        if (login.getAuth() != null) {
+            return login.getAuth()
+                    .stream()
+                    .map(e -> e.getName())
+                    .anyMatch(n -> n.equals("admin"));
+        }
+
+        return false;
     }
 }

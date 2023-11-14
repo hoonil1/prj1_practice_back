@@ -12,12 +12,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BoardService {
 
+    private final MemberService memberService;
     private final BoardMapper mapper;
 
     public boolean save(Board board, Member login) {
-
-
         board.setWriter(login.getId());
+
         return mapper.insert(board) == 1;
     }
 
@@ -33,7 +33,6 @@ public class BoardService {
         if (board.getTitle() == null || board.getTitle().isBlank()) {
             return false;
         }
-
 
         return true;
     }
@@ -51,17 +50,18 @@ public class BoardService {
     }
 
     public boolean update(Board board) {
-        return mapper.editBoard(board) == 1;
+        return mapper.update(board) == 1;
     }
 
     public boolean hasAccess(Integer id, Member login) {
+        if (memberService.isAdmin(login)) {
+            return true;
+        }
+
         Board board = mapper.selectById(id);
 
         return board.getWriter().equals(login.getId());
     }
 
-    public boolean pageAccess(Integer id, Member login) {
-        Board board = mapper.selectById(id);
-        return board.getWriter().equals(login.getId());
-    }
+
 }
