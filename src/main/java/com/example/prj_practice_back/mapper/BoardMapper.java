@@ -9,19 +9,19 @@ import java.util.List;
 public interface BoardMapper {
     @Insert("""
             insert into board (title,content,writer)
-            values (#{title}, #{content}, #{writer});
+            values (#{title}, #{content},#{writer});
             """)
     int insert(Board board);
 
     @Select("""
-            SELECT id, title, writer, inserted
+            SELECT id, title,writer, inserted
             FROM board
             ORDER BY id DESC
             """)
     List<Board> selectAll();
 
     @Select("""
-            SELECT id, title, content, writer, inserted
+            SELECT id, title, content,writer, inserted
             FROM board
             WHERE id = #{id}
             """)
@@ -35,8 +35,8 @@ public interface BoardMapper {
 
 
     @Update("""
-update board set title=#{title}, content=#{content}, writer=#{writer}
-where id=#{id}
-""")
+            update board set title=#{title}, content=#{content},writer=#{writer}
+            where id=#{id}
+            """)
     int editBoard(Board board);
 }

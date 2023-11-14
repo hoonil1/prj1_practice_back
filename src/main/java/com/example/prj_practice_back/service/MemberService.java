@@ -78,7 +78,7 @@ public class MemberService {
 
 
     public boolean login(Member member, WebRequest request) {
-        Member dbMember = mapper.selectByMemberId(member.getId());
+        Member dbMember = mapper.selectById(member.getId());
 
         if (dbMember != null) {
             if (dbMember.getPassword().equals(member.getPassword())) {
