@@ -2,6 +2,7 @@ package com.example.prj_practice_back.controller;
 
 import com.example.prj_practice_back.domain.Member;
 import com.example.prj_practice_back.service.MemberService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -98,10 +99,18 @@ public class MemberController {
     @PostMapping("login")
     public ResponseEntity login(@RequestBody Member member, WebRequest request) {
 
-        if (service.login(member,request)) {
+        if (service.login(member, request)) {
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
+
+    @PostMapping("logout")
+    public void logout(HttpSession session) {
+        if (session != null) {
+            session.invalidate();
+        }
+    }
+
 }
