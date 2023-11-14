@@ -3,8 +3,10 @@ package com.example.prj_practice_back.controller;
 import com.example.prj_practice_back.domain.Member;
 import com.example.prj_practice_back.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
 
 import java.util.List;
 
@@ -44,6 +46,7 @@ public class MemberController {
             return ResponseEntity.ok().build();
         }
     }
+
     @GetMapping(value = "check", params = "nickName")
     public ResponseEntity checkNickName(String nickName) {
         if (service.getNickName(nickName) == null) {
@@ -89,6 +92,16 @@ public class MemberController {
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("login")
+    public ResponseEntity login(@RequestBody Member member, WebRequest request) {
+
+        if (service.login(member,request)) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 }

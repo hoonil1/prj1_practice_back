@@ -62,6 +62,8 @@ public interface MemberMapper {
             """)
     int update(Member member);
 
+    Member selectByMemberId(String id;
+
 
     // dynamic sql
 //    @Update("""
