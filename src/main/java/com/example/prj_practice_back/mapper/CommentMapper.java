@@ -24,8 +24,14 @@ public interface CommentMapper {
     List<Comment> selectByBoardId(Integer boardId);
 
     @Delete("""
-            delete from comment
+        DELETE FROM comment
+        WHERE id = #{id}
+        """)
+    int deleteById(Integer id);
+
+    @Select("""
+            select * from comment
             where id = #{id}
             """)
-    int deleteByBoardId(Comment comment);
+    Comment selectById(Integer id);
 }

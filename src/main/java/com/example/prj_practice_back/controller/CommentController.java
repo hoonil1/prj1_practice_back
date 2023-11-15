@@ -5,7 +5,6 @@ import com.example.prj_practice_back.domain.Member;
 import com.example.prj_practice_back.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,16 +40,26 @@ public class CommentController {
         return service.list(boardId);
     }
 
-    @DeleteMapping("remove/{id}")
-    public ResponseEntity remove(@RequestBody Comment comment,
-                                 @SessionAttribute(value = "login", required = false)Comment login) {
+    @DeleteMapping("{id}")
+    public ResponseEntity remove(@PathVariable Integer id,
+                                         @SessionAttribute(value = "login", required = false) Member login) {
+        // TODO : 권한 검증 코드....
+
         if (login == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        if(service.delete(comment)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        if (service.hasAccess(id,login)) {
+            if (service.remove(id)) {
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.internalServerError().build();
+            }
+
         } else {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+
+
     }
 }
+
