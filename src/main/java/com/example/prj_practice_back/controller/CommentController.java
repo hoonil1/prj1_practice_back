@@ -41,7 +41,7 @@ public class CommentController {
         return service.list(boardId);
     }
 
-    @DeleteMapping("remove/{boardId}?{id}")
+    @DeleteMapping("remove/{id}")
     public ResponseEntity remove(@RequestBody Comment comment,
                                  @SessionAttribute(value = "login", required = false)Comment login) {
         if (login == null) {
