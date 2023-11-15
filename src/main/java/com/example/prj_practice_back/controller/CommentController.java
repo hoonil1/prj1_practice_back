@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/comment")
@@ -24,11 +26,29 @@ public class CommentController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         if (service.validate(comment)) {
-            if (service.add(comment,login)) {
+            if (service.add(comment, login)) {
                 return ResponseEntity.ok().build();
             } else {
                 return ResponseEntity.internalServerError().build();
             }
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("list")
+    public List<Comment> list(@RequestParam("id") Integer boardId) {
+        return service.list(boardId);
+    }
+
+    @DeleteMapping("remove/{boardId}?{id}")
+    public ResponseEntity remove(@RequestBody Comment comment,
+                                 @SessionAttribute(value = "login", required = false)Comment login) {
+        if (login == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if(service.delete(comment)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         } else {
             return ResponseEntity.badRequest().build();
         }
