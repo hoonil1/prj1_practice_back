@@ -17,22 +17,25 @@ public class CommentController {
 
     private final CommentService service;
 
-
     @PostMapping("add")
     public ResponseEntity add(@RequestBody Comment comment,
                               @SessionAttribute(value = "login", required = false) Member login) {
+
         if (login == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+
         if (service.validate(comment)) {
             if (service.add(comment, login)) {
                 return ResponseEntity.ok().build();
             } else {
                 return ResponseEntity.internalServerError().build();
             }
+
         } else {
             return ResponseEntity.badRequest().build();
         }
+
     }
 
     @GetMapping("list")
@@ -42,24 +45,45 @@ public class CommentController {
 
     @DeleteMapping("{id}")
     public ResponseEntity remove(@PathVariable Integer id,
-                                         @SessionAttribute(value = "login", required = false) Member login) {
-        // TODO : 권한 검증 코드....
-
+                                 @SessionAttribute(value = "login", required = false) Member login) {
         if (login == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        if (service.hasAccess(id,login)) {
+
+        if (service.hasAccess(id, login)) {
             if (service.remove(id)) {
                 return ResponseEntity.ok().build();
             } else {
                 return ResponseEntity.internalServerError().build();
             }
-
         } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+    }
+
+    @PutMapping("edit")
+    public ResponseEntity update(@RequestBody Comment comment,
+                                 @SessionAttribute(value = "login", required = false) Member login) {
+        if (login == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        if (service.hasAccess(comment.getId(), login)) {
+            if (!service.updateValidate(comment)) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            if (service.update(comment)) {
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.internalServerError().build();
+            }
+        } else {
+
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
 
     }
 }
-
