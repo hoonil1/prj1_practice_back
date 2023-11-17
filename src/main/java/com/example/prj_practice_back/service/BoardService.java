@@ -42,23 +42,21 @@ public class BoardService {
         return true;
     }
 
-    public Map<String,Object> list(Integer page) {
+    public Map<String, Object> list(Integer page) {
         Map<String, Object> map = new HashMap<>();
-
         Map<String, Object> pageInfo = new HashMap<>();
 
-
         int countAll = mapper.countAll();
-        int lastPageNumber = (countAll-1) / (10+1);
-        int startPageNumber = (page-1)/(10*10)+1;
-        int endPageNumber = 0;
+        int lastPageNumber = (countAll - 1) / 10 + 1;
+        int startPageNumber = (page - 1) / 10 * 10 + 1;
+        int endPageNumber = startPageNumber + 9;
         endPageNumber = Math.min(endPageNumber, lastPageNumber);
 
         pageInfo.put("startPageNumber", startPageNumber);
-        pageInfo.put("lastPageNumber", lastPageNumber);
+        pageInfo.put("endPageNumber", endPageNumber);
 
-        int from = (page-1)*10;
-        map.put("boardList",mapper.selectAll(from));
+        int from = (page - 1) * 10;
+        map.put("boardList", mapper.selectAll(from));
         map.put("pageInfo", pageInfo);
         return map;
     }
