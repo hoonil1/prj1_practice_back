@@ -4,6 +4,7 @@ import com.example.prj_practice_back.domain.Like;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 
 @Mapper
@@ -20,4 +21,10 @@ public interface LikeMapper {
         VALUES (#{boardId}, #{memberId})
         """)
     int insert(Like like);
+
+    @Select("""
+            select count(id) from boardlike
+            where boardId = #{boardId}
+            """)
+    int countByBoardId(Integer boardId);
 }
