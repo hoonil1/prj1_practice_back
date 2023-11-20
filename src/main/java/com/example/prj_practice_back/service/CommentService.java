@@ -5,11 +5,13 @@ import com.example.prj_practice_back.domain.Member;
 import com.example.prj_practice_back.mapper.CommentMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(rollbackFor = Exception.class)
 public class CommentService {
 
 

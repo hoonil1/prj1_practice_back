@@ -8,14 +8,17 @@ import com.example.prj_practice_back.mapper.FileMapper;
 import com.example.prj_practice_back.mapper.LikeMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(rollbackFor = Exception.class)
 public class BoardService {
 
     private final BoardMapper mapper;
@@ -23,7 +26,7 @@ public class BoardService {
     private final LikeMapper likeMapper;
     private final FileMapper fileMapper;
 
-    public boolean save(Board board, MultipartFile[] files, Member login) {
+    public boolean save(Board board, MultipartFile[] files, Member login) throws IOException {
         //
         board.setWriter(login.getId());
 
@@ -35,12 +38,9 @@ public class BoardService {
                 // boardId, name
                 fileMapper.insert(board.getId(), files[i].getOriginalFilename());
 
-                //일단 local 에 먼저 저장
-
-                upload(board.getId(), files[i]);
-
                 // 실제 파일을 S3 bucket에 upload
-
+                // 일단 local에 저장
+                upload(board.getId(), files[i]);
             }
         }
 
@@ -48,22 +48,18 @@ public class BoardService {
         return cnt == 1;
     }
 
-    private void upload(Integer boardId, MultipartFile file) {
+    private void upload(Integer boardId, MultipartFile file) throws IOException {
         // 파일 저장 경로
-        // C:/Temp/prj1/게시물번호/파일명
-        try {
-            File folder = new File("C:/Temp/prj1/" + boardId);
-            if (!folder.exists()) {
-                folder.mkdirs();
-            }
-            String path = folder.getAbsolutePath() + "/" + file.getOriginalFilename();
-            File des = new File(path);
-            file.transferTo(des);
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        // C:\Temp\prj1\게시물번호\파일명
+        File folder = new File("C:\\Temp\\prj1\\" + boardId);
+        if (!folder.exists()) {
+            folder.mkdirs();
         }
+
+        String path = folder.getAbsolutePath() + "\\" + file.getOriginalFilename();
+        File des = new File(path);
+        file.transferTo(des);
+
 
     }
 
@@ -76,33 +72,35 @@ public class BoardService {
             return false;
         }
 
-        return board.getTitle() != null && !board.getTitle().isBlank();
+        if (board.getTitle() == null || board.getTitle().isBlank()) {
+            return false;
+        }
+
+        return true;
     }
 
     public Map<String, Object> list(Integer page, String keyword) {
         Map<String, Object> map = new HashMap<>();
         Map<String, Object> pageInfo = new HashMap<>();
 
-//        int countAll = mapper.countAll();
         int countAll = mapper.countAll("%" + keyword + "%");
         int lastPageNumber = (countAll - 1) / 10 + 1;
         int startPageNumber = (page - 1) / 10 * 10 + 1;
         int endPageNumber = startPageNumber + 9;
         endPageNumber = Math.min(endPageNumber, lastPageNumber);
-
-        pageInfo.put("startPageNumber", startPageNumber);
-        pageInfo.put("endPageNumber", endPageNumber);
-        pageInfo.put("currentPageNumber", page);
-
         int prevPageNumber = startPageNumber - 10;
         int nextPageNumber = endPageNumber + 1;
+
+        pageInfo.put("currentPageNumber", page);
+        pageInfo.put("startPageNumber", startPageNumber);
+        pageInfo.put("endPageNumber", endPageNumber);
         if (prevPageNumber > 0) {
             pageInfo.put("prevPageNumber", prevPageNumber);
         }
         if (nextPageNumber <= lastPageNumber) {
             pageInfo.put("nextPageNumber", nextPageNumber);
-
         }
+
         int from = (page - 1) * 10;
         map.put("boardList", mapper.selectAll(from, "%" + keyword + "%"));
         map.put("pageInfo", pageInfo);
