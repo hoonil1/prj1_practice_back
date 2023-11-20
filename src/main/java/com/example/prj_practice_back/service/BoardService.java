@@ -4,9 +4,11 @@ import com.example.prj_practice_back.domain.Board;
 import com.example.prj_practice_back.domain.Member;
 import com.example.prj_practice_back.mapper.BoardMapper;
 import com.example.prj_practice_back.mapper.CommentMapper;
+import com.example.prj_practice_back.mapper.FileMapper;
 import com.example.prj_practice_back.mapper.LikeMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,11 +20,25 @@ public class BoardService {
     private final BoardMapper mapper;
     private final CommentMapper commentMapper;
     private final LikeMapper likeMapper;
+    private final FileMapper fileMapper;
 
-    public boolean save(Board board, Member login) {
+    public boolean save(Board board, MultipartFile[] files, Member login) {
+        //
         board.setWriter(login.getId());
 
-        return mapper.insert(board) == 1;
+        int cnt = mapper.insert(board);
+
+        // boardFile 테이블에 files 정보 저장
+        if (files != null) {
+            for (int i = 0; i < files.length; i++) {
+                // boardId, name
+                fileMapper.insert(board.getId(), files[i].getOriginalFilename());
+            }
+        }
+
+        // 실제 파일을 S3 bucket에 upload
+
+        return cnt == 1;
     }
 
     public boolean validate(Board board) {
@@ -40,7 +56,6 @@ public class BoardService {
 
         return true;
     }
-
     public Map<String, Object> list(Integer page, String keyword) {
         Map<String, Object> map = new HashMap<>();
         Map<String, Object> pageInfo = new HashMap<>();
@@ -56,17 +71,17 @@ public class BoardService {
         pageInfo.put("endPageNumber", endPageNumber);
         pageInfo.put("currentPageNumber", page);
 
-        int prevPageNumber = startPageNumber-10;
-        int nextPageNumber = endPageNumber+1;
-        if(prevPageNumber>0) {
+        int prevPageNumber = startPageNumber - 10;
+        int nextPageNumber = endPageNumber + 1;
+        if (prevPageNumber > 0) {
             pageInfo.put("prevPageNumber", prevPageNumber);
         }
-        if(nextPageNumber <= lastPageNumber) {
+        if (nextPageNumber <= lastPageNumber) {
             pageInfo.put("nextPageNumber", nextPageNumber);
 
         }
         int from = (page - 1) * 10;
-        map.put("boardList", mapper.selectAll(from,"%" + keyword + "%"));
+        map.put("boardList", mapper.selectAll(from, "%" + keyword + "%"));
         map.put("pageInfo", pageInfo);
         return map;
     }
