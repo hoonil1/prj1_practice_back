@@ -1,6 +1,7 @@
 package com.example.prj_practice_back.service;
 
 import com.example.prj_practice_back.domain.Board;
+import com.example.prj_practice_back.domain.BoardFile;
 import com.example.prj_practice_back.domain.Member;
 import com.example.prj_practice_back.mapper.BoardMapper;
 import com.example.prj_practice_back.mapper.CommentMapper;
@@ -19,6 +20,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -30,10 +32,12 @@ public class BoardService {
     private final CommentMapper commentMapper;
     private final LikeMapper likeMapper;
     private final FileMapper fileMapper;
-    @Value(("#{aw3.s3.bucket.name")
-    private final String bucket;
-    )
+
     private final S3Client s3;
+    @Value("${image.file.prefix}")
+    private String urlPrefix;
+    @Value("${aw3.s3.bucket.name}")
+    private String bucket;
 
     public boolean save(Board board, MultipartFile[] files, Member login) throws IOException {
         //
@@ -58,19 +62,8 @@ public class BoardService {
     }
 
     private void upload(Integer boardId, MultipartFile file) throws IOException {
-//        // 파일 저장 경로
-//        // C:\Temp\prj1\게시물번호\파일명
-//        File folder = new File("C:\\Temp\\prj1\\" + boardId);
-//        if (!folder.exists()) {
-//            folder.mkdirs();
-//        } ******* 로컬에 저장할때 코드 ******
-//        String path = folder.getAbsolutePath() + "\\" + file.getOriginalFilename();
-//        File des = new File(path);
-//        file.transferTo(des);
 
-        // ******* S3 저장 **************
         String key = "prj1/" + boardId + "/" + file.getOriginalFilename();
-
 
         PutObjectRequest objectRequest = PutObjectRequest.builder()
                 .bucket(bucket)
@@ -78,10 +71,7 @@ public class BoardService {
                 .acl(ObjectCannedACL.PUBLIC_READ)
                 .build();
 
-
-
-
-        s3.putObject(objectRequest, RequestBody.fromInputStream(file.getInputStream(),file.getSize()));
+        s3.putObject(objectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
 
     }
@@ -131,7 +121,18 @@ public class BoardService {
     }
 
     public Board get(Integer id) {
-        return mapper.selectById(id);
+        Board board = mapper.selectById(id);
+
+        List<BoardFile> boardFiles = fileMapper.selectNamesByBoardId(id);
+
+        for (BoardFile boardFile : boardFiles) {
+            String url = urlPrefix + "prj1/" +id +"/" + boardFile.getName();
+            boardFile.setUrl(url);
+        }
+        board.setFiles(boardFiles);
+
+
+        return board;
     }
 
     public boolean remove(Integer id) {
