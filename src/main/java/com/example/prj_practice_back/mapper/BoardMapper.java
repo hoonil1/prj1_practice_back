@@ -49,6 +49,8 @@ public interface BoardMapper {
     Board selectById(Integer id);
 
     @Delete("""
+        DELETE FROM board
+        WHERE id = #{id}
         delete from board
         where id = #{id}
         """)
@@ -84,5 +86,4 @@ public interface BoardMapper {
            OR content LIKE #{keyword}
         """)
     int countAll(String keyword);
-
 }

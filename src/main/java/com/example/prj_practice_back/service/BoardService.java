@@ -18,6 +18,7 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -34,10 +35,9 @@ public class BoardService {
     private final FileMapper fileMapper;
 
     private final S3Client s3;
-
     @Value("${image.file.prefix}")
     private String urlPrefix;
-    @Value("${aws.s3.bucket.name}")
+    @Value("${aw3.s3.bucket.name}")
     private String bucket;
 
     public boolean save(Board board, MultipartFile[] files, Member login) throws IOException {
@@ -127,11 +127,11 @@ public class BoardService {
         List<BoardFile> boardFiles = fileMapper.selectNamesByBoardId(id);
 
         for (BoardFile boardFile : boardFiles) {
-            String url = urlPrefix + "prj1/" + id + "/" + boardFile.getName();
+            String url = urlPrefix + "prj1/" +id +"/" + boardFile.getName();
             boardFile.setUrl(url);
         }
-
         board.setFiles(boardFiles);
+
 
         return board;
     }

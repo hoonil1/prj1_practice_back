@@ -1,6 +1,5 @@
 package com.example.prj_practice_back.mapper;
 
-import com.example.prj_practice_back.domain.Board;
 import com.example.prj_practice_back.domain.BoardFile;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
@@ -12,22 +11,24 @@ import java.util.List;
 @Mapper
 public interface FileMapper {
 
+
     @Insert("""
-        INSERT INTO boardFile (boardId, name)
-        VALUES (#{boardId}, #{name})
-        """)
+insert into boardFile (boardId,name)
+values (#{boardId},#{name})
+""")
     int insert(Integer boardId, String name);
 
     @Select("""
-        SELECT id, name
-        FROM boardFile
-        WHERE boardId = #{boardId}
-        """)
+select id,name from boardfile
+where boardId=${boardId}
+order by 1 desc
+""")
     List<BoardFile> selectNamesByBoardId(Integer boardId);
 
     @Delete("""
-        DELETE FROM boardFile
-        WHERE boardId = #{boardId}
-        """)
+delete from boardfile
+where boardId = #{boardId}
+""")
     int deleteByBoardId(Integer boardId);
 }
+
