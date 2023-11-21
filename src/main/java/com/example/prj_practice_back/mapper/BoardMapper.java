@@ -84,4 +84,5 @@ public interface BoardMapper {
            OR content LIKE #{keyword}
         """)
     int countAll(String keyword);
+
 }
